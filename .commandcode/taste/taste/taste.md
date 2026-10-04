@@ -1,0 +1,22 @@
+# Taste
+- Wants thorough discussion and planning (end-to-end, "hulu ke hilir") of an idea/architecture before any code or code structure is written — explicitly asks to stay in pure discussion mode first. Confidence: 0.85
+- Communicates in Indonesian (Bahasa Indonesia). Confidence: 0.7
+- Wants the outcome of planning discussions captured in a written markdown doc (e.g. `note.md` in the project root) — decisions made, open questions, trade-offs, and phase roadmap — before moving on to implementation. Confidence: 0.7
+- Prefers the Vue ecosystem for web frontends — chose Nuxt (Vue 3) over React/Vite and SvelteKit when picking a framework. Confidence: 0.65
+- Prefers TypeScript over plain JavaScript for new projects, including typed data schemas (e.g. TS + Zod). Confidence: 0.6
+- Prefers Monaco as the in-browser code editor. Confidence: 0.5
+- Uses the vinicunca.dev tooling ecosystem and wants its full suite adopted — `@vinicunca/unocss-preset` (UnoCSS preset), `@vinicunca/eslint-config` (ESLint flat config), and `@vinicunca/perkakas` (functional utilities). Confidence: 0.8
+- Prefers UnoCSS for styling in Vue/Nuxt projects. Confidence: 0.7
+- Wants linting set up and configured (ESLint with explicit rules, `lint`/`lint:fix` scripts, editor auto-fix on save) as part of project setup. Confidence: 0.6
+- Before implementation, wants a detailed step-by-step blueprint (features, pages, functions, and the flow of each function) written to a doc, and expects the existing planning notes to be read back first. Confidence: 0.6
+- Iteratively escalates planning artifacts into a single consolidated document (note.md → blueprint.md → PRD.md) — each new spec should fold in all prior notes/blueprints into one canonical technical file rather than leaving details spread across older docs. Confidence: 0.6
+- Wants specs to be diagram-driven: sequence diagrams (Mermaid) for every flow from start to finish, so each process is shown step by step end to end. Confidence: 0.7
+- Establishes explicit project working rules: before starting any work, read the existing planning docs first, and when docs conflict they resolve in a fixed priority order (PRD > blueprint > note). Confidence: 0.75
+- Prefers being asked for clarification on ambiguous requests instead of having the agent guess — expects the question to come with concrete options plus a recommended choice before any execution. Confidence: 0.8
+- Design taste: clean, minimal UI — a single accent color, hierarchy expressed through spacing rather than dividers/borders, calm typography, minimal animation, no decoration without function, and the code editor treated as the primary focus of a page. Confidence: 0.8
+- Wants both light and dark theme support in the UI, with an animated (smooth) color transition when switching themes rather than an instant swap. Confidence: 0.55
+- Prefers Lucide as the icon set, consumed via UnoCSS preset-icons as CSS classes (`i-lucide-*`) rather than shipping individual SVG files. Confidence: 0.55
+- Prefers a system font stack for UI typography — no web-font downloads and no font asset files. Confidence: 0.55
+- Expects the spec to spell out the complete project folder/file structure — pages, components, assets, icons, and naming/placement conventions — not just features and flows. Confidence: 0.65
+- Favors a minimal asset footprint: no font files, no SVG icon files, no decorative illustrations — assets should be limited to essentials (favicon, robots.txt, one global CSS). Confidence: 0.5
+- Wants a todo/checklist presented first before executing a larger task, then step-by-step execution that is detailed and clear (explicitly asks for the todo first, then a thorough, unambiguous execution of each step). Confidence: 0.7

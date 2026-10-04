@@ -1,0 +1,89 @@
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
+}
+
+.markdown > * + * {
+  margin-top: 0.75rem;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-weight: 600;
+  color: inherit;
+}
+
+.markdown h1 {
+  font-size: 1rem;
+}
+
+.markdown h2 {
+  font-size: 0.9375rem;
+}
+
+.markdown h3 {
+  font-size: 0.875rem;
+}
+
+.markdown code {
+  padding: 0.125rem 0.3rem;
+  border-radius: 0.25rem;
+  background-color: color-mix(in oklab, currentcolor 8%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+.markdown pre {
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  background-color: color-mix(in oklab, currentcolor 6%, transparent);
+  overflow-x: auto;
+}
+
+.markdown pre code {
+  padding: 0;
+  background: none;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.markdown ol {
+  list-style: decimal;
+}
+
+.markdown li + li {
+  margin-top: 0.25rem;
+}
+
+.markdown strong {
+  font-weight: 600;
+}
+
+.markdown blockquote {
+  padding-left: 0.75rem;
+  border-left: 2px solid color-mix(in oklab, currentcolor 20%, transparent);
+  opacity: 0.85;
+}

@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(node -v; echo \"npm: $(npm -v)\"; echo \"pnpm: $(pnpm -v 2>/dev/null || echo 'not installed')\"; echo \"---\"; git rev-parse --is-inside-work-tree 2>/dev/null || echo \"no git repo\")",
+      "Shell(npx --yes nuxi@latest init --help)",
+      "Shell(npx --yes nuxi@latest init scaffold --no-install --packageManager pnpm -M @unocss/nuxt < /dev/null 2>&1 | tail -30; echo \"=== TREE ===\"; find scaffold -type f -not -path '*/.git/*' | sort)",
+      "Shell(npx --yes nuxi@latest init scaffold --template minimal --no-gitInit --no-install --packageManager pnpm -M @unocss/nuxt < /dev/null 2>&1 | tail -20; echo \"=== TREE ===\"; find scaffold -type f -not -path '*/.git/*' -not -path '*/node_modules/*' | sort)",
+      "Shell(cp:*)",
+      "Shell(pnpm:*)",
+      "Shell(tail:*)",
+      "Shell(node --input-type=module -e \" import { createGenerator } from 'unocss'; import { presetVinicunca } from '@vinicunca/unocss-preset'; const uno = await createGenerator({ presets: [presetVinicunca()] }); const { css, matched } = await uno.generate('text-red-500 p-4 rounded-lg animate-shape', { preflights: false }); console.log('matched:', [...matched].join(', ')); console.log('--- css ---'); console.log(css.trim().slice(0, 300)); \")",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/check-mermaid.mjs /home/rafiii/my-projct/letcode-app/PRD.md)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/check-mermaid.mjs /home/rafiii/my-projct/letcode-app/PRD.md echo \"---\" wc -l /home/rafiii/my-projct/letcode-app/PRD.md grep -c '^```mermaid' /home/rafiii/my-projct/letcode-app/PRD.md grep -n '^## ' /home/rafiii/my-projct/letcode-app/PRD.md)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/check-mermaid.mjs PRD.md)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/check-mermaid.mjs PRD.md | tail -3 echo \"--- fence balance (harus genap) ---\" grep -c '^```' PRD.md echo \"--- struktur ---\" wc -l PRD.md grep -n '^## ' PRD.md | tail -4 grep -n '^### 23\\.' PRD.md)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/check-mermaid.mjs PRD.md | tail -5 echo \"--- fence (harus genap) ---\"; grep -c '^```' PRD.md echo \"--- ukuran & diagram ---\"; wc -l PRD.md; grep -c '^```mermaid' PRD.md echo \"--- bagian bertema ---\"; grep -n 'Tema\\|theme' PRD.md | grep -v '^.*#\\s*$' | head -20)",
+      "Shell(node scripts/validate-content.ts 2 >& 1)",
+      "Shell(node -p JSON.stringify(JSON.parse(require('fs').readFileSync('node_modules/monaco-editor/package.json','utf8')).exports, null, 2))",
+      "Shell(head:*)",
+      "Shell(grep:*)",
+      "Shell(echo:*)",
+      "Shell(node .output/server/index.mjs)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/judge-test.mjs 2 >& 1)",
+      "Shell(node -e  const m = await import('file:///home/rafiii/my-projct/letcode-app/app/data/problems/two-sum.ts'); console.log('keys:', Object.keys(m)); console.log('twoSum?', typeof m.twoSum);  --input-type=module 2 >& 1)",
+      "Shell(node --input-type=module -e  const base = 'file:///home/rafiii/my-projct/letcode-app/app/data/problems/'; const files = ['two-sum.ts','contains-duplicate.ts','valid-anagram.ts','product-except-self.ts','group-anagrams.ts']; for (const f of files) { try { const m = await import(base + f); const names = Object.keys(m); const ok = names.filter(n => m[n] && typeof m[n] === 'object' && 'templates' in m[n]); console.log(f, '=>', names.join(','), '| problem-like:', ok.join(',') || 'TIDAK ADA'); } catch (e) { console.log(f, '=> ERROR', e.message); } }  2 >& 1)",
+      "Shell(node --input-type=module -e  import { loadPyodide } from 'pyodide'; const py = await loadPyodide(); const result = py.runPython('1 + 1'); console.log('1+1 =', result); py.runPython('def tambah(a, b):\\n return [a + b, a * b]'); const fn = py.globals.get('tambah'); const out = fn(2, 3).toJs(); console.log('tambah(2,3) =', JSON.stringify(out), typeof out, Array.isArray(out)); const nested = fn(py.toPy([1,2]), 3).toJs(); console.log('nested =', JSON.stringify(nested));  2 >& 1)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/python-test.mjs 2 >& 1)",
+      "Shell(rm:*)",
+      "Shell(node /tmp/commandcode-1000/-home-rafiii-my-projct-letcode-app/6055a3a2-e2b6-41e2-bbd8-844e2508001b/scratchpad/race-test.mjs 2 >& 1)",
+      "Shell(node -p JSON.stringify(require('./node_modules/vue/package.json').exports['.'], null, 2) 2 > /dev/null)",
+      "Shell(python3 - <<'PY' from pathlib import Path path = Path(\"/home/rafiii/my-projct/letcode-app/app/pages/problems/[slug].vue\") text = path.read_text() before = \"\"\"const { mode } = useTheme(); const running = computed(() => status.value === 'running'); onMounted(() => { initialize(); }); \"\"\" after = \"\"\"const { mode } = useTheme(); const running = computed(() => status.value === 'running'); // Dipanggil di setup, bukan onMounted: hook onMounted milik komponen anak berjalan // lebih dulu, sehingga editor akan membaca nilai yang masih kosong. initialize(); \"\"\" assert before in text, \"pola tidak ditemukan\" path.write_text(text.replace(before, after, 1)) print(\"Fix A diterapkan pada [slug].vue\") PY)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
