@@ -272,7 +272,7 @@ dan hanya menambah masalah hidrasi.
 ```ts
 type LanguageId = 'javascript' | 'python';
 type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
-type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'floatApprox';
+type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'unorderedAllLevels' | 'floatApprox';
 
 // Bahasa antarmuka & konten (bagian 24)
 type Locale = 'id' | 'en';
@@ -493,11 +493,33 @@ Argumen dikonversi via `toPy` / `toJs`.
 ### 12.1 Komparator
 | Id | Perilaku |
 | --- | --- |
-| `deepEqual` | `perkakas.isDeepEqual(actual, expected)` |
-| `unorderedDeepEqual` | urutkan kedua array lalu `isDeepEqual` |
+| `deepEqual` | `perkakas.isDeepEqual(actual, expected)` — paling ketat |
+| `unorderedDeepEqual` | urutkan **koleksi terluar** saja, lalu `isDeepEqual` |
+| `unorderedAllLevels` | urutkan **semua tingkat**, untuk hasil yang benar-benar himpunan |
 | `floatApprox` | bandingkan per elemen dengan `\|a - b\| <= tolerance` |
 
 Default: `deepEqual`. Komparator ditentukan per soal, dengan opsi override per test case.
+
+**Kenapa dua varian unordered.** Membuat semua tingkat tidak terurut itu berbahaya: ia
+akan menerima jawaban yang salah. Contoh nyata yang pernah lolos sebelum diperbaiki:
+
+| Soal | Jawaban salah | Sebelum | Sesudah |
+| --- | --- | --- | --- |
+| `permutations` | enam kali `[1,2,3]` (bukan himpunan permutasi) | diterima | ditolak |
+| `k-closest-points-to-origin` | koordinat dibalik `[2,1]` (titik berbeda) | diterima | ditolak |
+| `subsets` | urutan dalam subset dibalik, padahal statement menjamin urutan asli | diterima | ditolak |
+
+Aturan pemilihan:
+
+1. Urutan koleksi tidak penting, **isi tiap elemen punya makna** → `unorderedDeepEqual`.
+   Contoh: daftar titik (`[x, y]`), daftar permutasi (urutan dalam permutasi itu penting),
+   daftar string.
+2. Urutan koleksi tidak penting **dan** isi tiap elemen juga tidak penting (benar-benar
+   himpunan) → `unorderedAllLevels`. Contoh: daftar triplet 3Sum, daftar grup anagram,
+   daftar kombinasi.
+
+Kalau ragu, pilih yang lebih ketat: menolak jawaban benar masih bisa diperbaiki dengan
+menjelaskan representasi di statement; menerima jawaban salah merusak penilaian.
 
 ### 12.2 Aturan Verdict
 ```
@@ -1242,8 +1264,8 @@ eksplisit, sesuai aturan arsitektur bahwa UI tidak pernah menyentuh Worker langs
 | `index.ts` | Facade `run(request)` + `resolveDriver(language)` |
 | `js-driver.ts` | Driver JavaScript (browser-js) |
 | `pyodide-driver.ts` | Driver Python (browser-pyodide) + `warmup()` |
-| `harness.ts` | `buildJavaScriptHarness`, `buildPythonHarness` |
-| `compare.ts` | Komparator `deepEqual`, `unorderedDeepEqual`, `floatApprox` |
+| `harness.ts` | `buildJavaScriptHarness` — menyusun ulang kode peserta agar mengembalikan fungsi target |
+| `compare.ts` | Komparator `deepEqual`, `unorderedDeepEqual`, `unorderedAllLevels`, `floatApprox` |
 | `verdict.ts` | `deriveVerdict(cases)` |
 | `errors.ts` | `normalizeError` — bedakan compile / runtime / timeout |
 | `protocol.ts` | Tipe pesan UI ↔ Worker |

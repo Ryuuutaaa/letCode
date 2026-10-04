@@ -4,7 +4,16 @@ export type LanguageId = 'javascript' | 'python';
 
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
-export type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'floatApprox';
+/**
+ * `unorderedDeepEqual` mengabaikan urutan **koleksi terluar** saja, isi tiap elemen
+ * tetap dibandingkan apa adanya. Dipakai ketika urutan hasil tidak penting tapi isi
+ * tiap hasil punya makna (mis. `[x, y]` pada titik koordinat, atau urutan dalam satu
+ * permutasi).
+ *
+ * `unorderedAllLevels` mengabaikan urutan di **semua tingkat**, untuk soal yang
+ * hasilnya benar-benar himpunan (mis. daftar kombinasi, daftar triplet).
+ */
+export type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'unorderedAllLevels' | 'floatApprox';
 
 /** Satu sub-bab materi. `id` dipakai sebagai anchor daftar isi. */
 export interface MaterialSection {

@@ -3,19 +3,51 @@ import { isDeepEqual } from '@vinicunca/perkakas';
 
 const DEFAULT_TOLERANCE = 1e-6;
 
-function canonicalize(value: unknown): unknown {
+function stableKey(value: unknown): string {
+  try {
+    return JSON.stringify(value) ?? String(value);
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * Mengurutkan array pada satu tingkat saja, sehingga isi setiap elemen tetap utuh.
+ * Ini yang membuat `[1, 2]` dan `[2, 1]` tetap dianggap berbeda.
+ */
+function sortTopLevel(value: unknown): unknown {
+  if (!Array.isArray(value)) {
+    return value;
+  }
+
+  return [...value].sort((a, b) => {
+    const left = stableKey(a);
+    const right = stableKey(b);
+
+    if (left === right) {
+      return 0;
+    }
+
+    return left < right ? -1 : 1;
+  });
+}
+
+/** Mengurutkan array pada semua tingkat, untuk hasil yang benar-benar himpunan. */
+function sortAllLevels(value: unknown): unknown {
   if (!Array.isArray(value)) {
     return value;
   }
 
   return value
-    .map((item) => canonicalize(item))
+    .map((item) => sortAllLevels(item))
     .sort((a, b) => {
-      const left = JSON.stringify(a) ?? '';
-      const right = JSON.stringify(b) ?? '';
+      const left = stableKey(a);
+      const right = stableKey(b);
+
       if (left === right) {
         return 0;
       }
+
       return left < right ? -1 : 1;
     });
 }
@@ -43,7 +75,9 @@ export function compare(
 ): boolean {
   switch (comparator) {
     case 'unorderedDeepEqual':
-      return isDeepEqual(canonicalize(actual), canonicalize(expected));
+      return isDeepEqual(sortTopLevel(actual), sortTopLevel(expected));
+    case 'unorderedAllLevels':
+      return isDeepEqual(sortAllLevels(actual), sortAllLevels(expected));
     case 'floatApprox':
       return compareFloat(actual, expected, tolerance);
     default:
