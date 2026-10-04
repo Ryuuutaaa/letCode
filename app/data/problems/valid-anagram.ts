@@ -2,7 +2,10 @@ import type { Problem } from '~/types/content';
 
 export const validAnagram: Problem = {
   slug: 'valid-anagram',
-  title: 'Valid Anagram',
+  title: {
+    id: 'Valid Anagram',
+    en: 'Valid Anagram',
+  },
   difficulty: 'easy',
   trackId: 'arrays-hashing',
   order: 3,
@@ -13,10 +16,16 @@ export const validAnagram: Problem = {
   ],
   returnType: 'boolean',
   timeLimitMs: 2000,
-  statement: `Dua string disebut **anagram** jika keduanya tersusun dari huruf yang sama
+  statement: {
+    id: `Dua string disebut **anagram** jika keduanya tersusun dari huruf yang sama
 dengan jumlah kemunculan yang sama, hanya urutannya yang berbeda.
 
 Diberikan dua string \`s\` dan \`t\`. Kembalikan \`true\` jika \`t\` adalah anagram dari \`s\`.`,
+    en: `Two strings are **anagrams** if they are made of the same letters with the same
+counts, only the order differs.
+
+You are given two strings \`s\` and \`t\`. Return \`true\` if \`t\` is an anagram of \`s\`.`,
+  },
   examples: [
     {
       input: 's = "anagram", t = "nagaram"',
@@ -27,11 +36,18 @@ Diberikan dua string \`s\` dan \`t\`. Kembalikan \`true\` jika \`t\` adalah anag
       output: 'false',
     },
   ],
-  hints: [
-    'Kalau panjang keduanya berbeda, apakah mungkin anagram?',
-    'Hitung kemunculan setiap huruf di string pertama, lalu kurangi dengan string kedua.',
-  ],
-  explanation: `## Pendekatan
+  hints: {
+    id: [
+      'Kalau panjang keduanya berbeda, apakah mungkin anagram?',
+      'Hitung kemunculan setiap huruf di string pertama, lalu kurangi dengan string kedua.',
+    ],
+    en: [
+      'If the lengths differ, can they still be anagrams?',
+      'Count each letter in the first string, then subtract while walking the second.',
+    ],
+  },
+  explanation: {
+    id: `## Pendekatan
 
 Pertama, kalau panjang kedua string berbeda, jawabannya pasti \`false\`. Ini menghemat
 banyak kerja.
@@ -49,11 +65,27 @@ bukan anagram.
 
 Mengurutkan kedua string lalu membandingkannya. Kompleksitasnya O(n log n), lebih lambat
 tapi jauh lebih pendek untuk ditulis.`,
+    en: `## Approach
+
+First, if the two lengths differ the answer is always \`false\`. That saves a lot of work.
+
+After that, count every letter in \`s\`, then walk \`t\` and decrement the counts. If a letter
+runs out or was never there, the strings are not anagrams.
+
+## Complexity
+
+- Time: O(n) — two passes, where n is the length of the string.
+- Space: O(k) — k is the number of distinct letters. For a fixed alphabet this is O(1).
+
+## Alternative
+
+Sort both strings and compare them. That is O(n log n) — slower, but far shorter to write.`,
+  },
   templates: [
     {
       language: 'javascript',
       template: `function isAnagram(s, t) {
-  // tulis solusimu di sini
+  // write your solution here
 }
 `,
       solution: `function isAnagram(s, t) {
@@ -81,7 +113,7 @@ tapi jauh lebih pendek untuk ditulis.`,
     {
       language: 'python',
       template: `def isAnagram(s, t):
-    # tulis solusimu di sini
+    # write your solution here
     pass
 `,
       solution: `def isAnagram(s, t):

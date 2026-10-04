@@ -81,6 +81,7 @@ Satu situs statis yang menggabungkan:
 | Tipografi | System font stack (tanpa aset font) |
 | Tema | Light + dark; default ikut sistem, pilihan pengguna disimpan |
 | Animasi tema | Transisi warna halus, maksimal 200 ms |
+| Bahasa antarmuka | Indonesia (id) + Inggris (en); default ikut bahasa browser, fallback `id` |
 | Prinsip UI | Clean & minimalis (bagian 15.1) |
 
 Keputusan di tabel ini hanya berubah bila diminta secara eksplisit (lihat bagian 22.3).
@@ -273,12 +274,16 @@ type LanguageId = 'javascript' | 'python';
 type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'floatApprox';
 
+// Bahasa antarmuka & konten (bagian 24)
+type Locale = 'id' | 'en';
+type Localized<T> = Record<Locale, T>;
+
 interface Track {
   id: string; // 'arrays-hashing'
-  title: string;
+  title: Localized<string>;
   order: number;
-  summary: string;
-  material: string; // markdown
+  summary: Localized<string>;
+  material: Localized<string>; // markdown
   problemSlugs: Array<string>; // urutan belajar
 }
 
@@ -292,9 +297,9 @@ interface TestCase {
 }
 
 interface Example {
-  input: string; // tampilan manusia
-  output: string;
-  explanation?: string;
+  input: string; // tampilan manusia, tidak diterjemahkan
+  output: string; // tidak diterjemahkan
+  explanation?: Localized<string>;
 }
 
 interface CodeTemplate {
@@ -305,18 +310,18 @@ interface CodeTemplate {
 
 interface Problem {
   slug: string;
-  title: string;
+  title: Localized<string>;
   difficulty: Difficulty;
   trackId: string;
   order: number;
-  statement: string; // markdown
+  statement: Localized<string>; // markdown
   examples: Array<Example>;
   functionName: string;
   parameters: Array<{ name: string; type: string }>;
   returnType: string;
   timeLimitMs: number;
-  hints: Array<string>;
-  explanation?: string; // markdown, setelah Accepted
+  hints: Localized<Array<string>>;
+  explanation?: Localized<string>; // markdown, setelah Accepted
   templates: Array<CodeTemplate>;
   testCases: Array<TestCase>;
 }
@@ -1125,6 +1130,8 @@ letcode-app/
 │   ├── data/
 │   │   ├── tracks/                 # definisi track
 │   │   └── problems/               # definisi soal
+│   ├── i18n/
+│   │   └── messages.ts             # kamus pesan UI (id & en)
 │   ├── lib/
 │   │   └── runner/                 # lapis Runner (explicit import)
 │   ├── pages/                      # route (file-based routing)
@@ -1336,3 +1343,68 @@ setelah koleksi dipasang, karena beberapa ikon pernah berganti nama.
    atau `pages/`.
 8. **Lapisan Content tidak boleh** mengimpor dari Runner.
 9. Yang dipakai di lebih dari satu lapis masuk ke `types/`, bukan didefinisikan ulang.
+
+---
+
+## 24. Internasionalisasi (i18n)
+
+### 24.1 Ruang Lingkup
+Dua bahasa: **Indonesia (`id`)** dan **Inggris (`en`)**. Yang diterjemahkan mencakup
+seluruh teks yang dilihat pengguna:
+
+| Bagian | Diterjemahkan | Catatan |
+| --- | --- | --- |
+| Navigasi, tombol, label, pesan status | Ya | kamus `app/i18n/messages.ts` |
+| Judul & ringkasan track | Ya | `Track.title`, `Track.summary` |
+| Materi track | Ya | `Track.material` |
+| Judul, pernyataan, hint, pembahasan soal | Ya | `Problem.title`, `statement`, `hints`, `explanation` |
+| Penjelasan contoh | Ya | `Example.explanation` |
+| `Example.input` / `Example.output` | Tidak | sudah universal (notasi teknis) |
+| Kode template & reference solution | Tidak | komentar memakai bahasa Inggris agar netral |
+| Nama kesulitan (Easy/Medium/Hard/Expert) | Tidak | istilah teknis yang lazim dipakai apa adanya |
+
+### 24.2 Pendekatan
+Memakai composable sendiri, **bukan** `@nuxtjs/i18n`. Alasan:
+
+1. Kebutuhan hanya dua bahasa dan teks statis.
+2. `@nuxtjs/i18n` mengubah URL menjadi berprefiks (`/en/...`) — tidak diperlukan di sini,
+   dan berisiko terhadap kunci `localStorage` yang berbasis `slug`.
+3. Tidak menambah dependency baru.
+
+**Berkas terkait:**
+
+| Berkas | Peran |
+| --- | --- |
+| `app/types/i18n.ts` | `Locale`, `Localized<T>`, `LOCALES`, `LOCALE_LABELS`, `DEFAULT_LOCALE` |
+| `app/i18n/messages.ts` | Kamus pesan UI; `MessageKey` diturunkan dari kamus `id`, dan kamus `en` wajib lengkap |
+| `app/composables/useI18n.ts` | `locale`, `setLocale`, `t(key, params)`, `localized(value)` |
+
+Kamus `en` dideklarasikan sebagai `Record<MessageKey, string>` sehingga kunci yang hilang
+gagal saat kompilasi, bukan saat runtime.
+
+### 24.3 Perilaku
+- Saat pertama kali dibuka dan belum ada pilihan tersimpan: **ikut bahasa browser**
+  (`navigator.languages`), dengan fallback `id`.
+- Setelah pengguna menekan tombol switch: pilihannya disimpan di `letcode:locale:v1` dan
+  menimpa deteksi otomatis.
+- Atribut `<html lang>` selalu disinkronkan dengan bahasa aktif.
+- Pergantian bahasa bersifat reaktif: seluruh teks dan konten berganti tanpa reload.
+
+### 24.4 Kunci `localStorage`
+| Kunci | Isi | Format |
+| --- | --- | --- |
+| `letcode:locale:v1` | `'id'` atau `'en'`; tidak ada berarti ikut browser | string |
+
+### 24.5 Tombol Switch
+Berupa segmented control kecil `ID | EN` di `AppHeader`, bersebelahan dengan `ThemeToggle`.
+Menampilkan kedua opsi sekaligus (bukan tombol toggle tunggal) supaya bahasa aktif langsung
+terlihat, dan konsisten dengan pola `LanguageSelect` di workspace.
+
+### 24.6 Mencegah Ketidaksesuaian Saat Muat
+Script boot inline di `<head>` (bersama script tema) menetapkan `document.documentElement.lang`
+sebelum aplikasi hidrasi, memakai urutan yang sama: pilihan tersimpan → bahasa browser → `id`.
+
+### 24.7 Menambah Bahasa Baru
+1. Tambahkan kode bahasa ke `Locale` dan `LOCALES` di `app/types/i18n.ts`.
+2. Tambahkan kamus baru di `app/i18n/messages.ts` (kompilasi akan menuntut kelengkapannya).
+3. Tambahkan versi bahasa pada setiap field `Localized<T>` di `app/data/`.

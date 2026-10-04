@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const { overallProgress } = useProgress();
+const { t } = useI18n();
+
 const tracks = listTracks();
 const overall = computed(() => overallProgress());
 </script>
@@ -9,17 +11,16 @@ const overall = computed(() => overallProgress());
     <section class="space-y-4">
       <div class="space-y-2">
         <h1 class="text-xl tracking-tight font-semibold">
-          Latihan interview
+          {{ t('dashboard.title') }}
         </h1>
         <p class="text-sm text-neutral-500 leading-relaxed max-w-2xl dark:text-neutral-400">
-          Kerjakan soal langsung di browser tanpa perlu setup. Progres dan kode
-          tersimpan otomatis di perangkat ini.
+          {{ t('dashboard.subtitle') }}
         </p>
       </div>
 
       <div class="max-w-sm space-y-2">
         <div class="text-xs text-neutral-500 flex items-center justify-between dark:text-neutral-400">
-          <span>Progres keseluruhan</span>
+          <span>{{ t('dashboard.overall') }}</span>
           <span class="tabular-nums">{{ overall.solved }}/{{ overall.total }}</span>
         </div>
         <BaseProgressBar :percent="overall.percent" />
@@ -28,7 +29,7 @@ const overall = computed(() => overallProgress());
 
     <section class="space-y-3">
       <h2 class="text-sm text-neutral-500 font-medium dark:text-neutral-400">
-        Track
+        {{ t('dashboard.tracks') }}
       </h2>
       <div class="gap-3 grid">
         <TrackCard

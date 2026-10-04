@@ -1,3 +1,5 @@
+import type { Localized } from './i18n';
+
 export type LanguageId = 'javascript' | 'python';
 
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
@@ -6,10 +8,10 @@ export type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'floatApprox';
 
 export interface Track {
   id: string;
-  title: string;
+  title: Localized<string>;
   order: number;
-  summary: string;
-  material: string;
+  summary: Localized<string>;
+  material: Localized<string>;
   problemSlugs: Array<string>;
 }
 
@@ -25,7 +27,7 @@ export interface TestCase {
 export interface Example {
   input: string;
   output: string;
-  explanation?: string;
+  explanation?: Localized<string>;
 }
 
 export interface CodeTemplate {
@@ -41,18 +43,18 @@ export interface ProblemParameter {
 
 export interface Problem {
   slug: string;
-  title: string;
+  title: Localized<string>;
   difficulty: Difficulty;
   trackId: string;
   order: number;
-  statement: string;
+  statement: Localized<string>;
   examples: Array<Example>;
   functionName: string;
   parameters: Array<ProblemParameter>;
   returnType: string;
   timeLimitMs: number;
-  hints: Array<string>;
-  explanation?: string;
+  hints: Localized<Array<string>>;
+  explanation?: Localized<string>;
   templates: Array<CodeTemplate>;
   testCases: Array<TestCase>;
 }

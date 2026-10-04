@@ -2,7 +2,10 @@ import type { Problem } from '~/types/content';
 
 export const containsDuplicate: Problem = {
   slug: 'contains-duplicate',
-  title: 'Contains Duplicate',
+  title: {
+    id: 'Contains Duplicate',
+    en: 'Contains Duplicate',
+  },
   difficulty: 'easy',
   trackId: 'arrays-hashing',
   order: 2,
@@ -10,27 +13,46 @@ export const containsDuplicate: Problem = {
   parameters: [{ name: 'nums', type: 'number[]' }],
   returnType: 'boolean',
   timeLimitMs: 2000,
-  statement: `Diberikan sebuah array bilangan bulat \`nums\`.
+  statement: {
+    id: `Diberikan sebuah array bilangan bulat \`nums\`.
 
 Kembalikan \`true\` jika ada nilai yang muncul **lebih dari satu kali** di dalam array,
 dan \`false\` jika semua nilai unik.`,
+    en: `You are given an array of integers \`nums\`.
+
+Return \`true\` if any value appears **more than once** in the array, and \`false\` if every
+element is distinct.`,
+  },
   examples: [
     {
       input: 'nums = [1, 2, 3, 1]',
       output: 'true',
-      explanation: 'Angka 1 muncul dua kali.',
+      explanation: {
+        id: 'Angka 1 muncul dua kali.',
+        en: 'The value 1 appears twice.',
+      },
     },
     {
       input: 'nums = [1, 2, 3, 4]',
       output: 'false',
-      explanation: 'Semua nilai berbeda.',
+      explanation: {
+        id: 'Semua nilai berbeda.',
+        en: 'Every value is distinct.',
+      },
     },
   ],
-  hints: [
-    'Bagaimana cara mengetahui sebuah nilai sudah pernah dilihat sebelumnya?',
-    'Hitung jumlah nilai unik, lalu bandingkan dengan panjang array.',
-  ],
-  explanation: `## Pendekatan
+  hints: {
+    id: [
+      'Bagaimana cara mengetahui sebuah nilai sudah pernah dilihat sebelumnya?',
+      'Hitung jumlah nilai unik, lalu bandingkan dengan panjang array.',
+    ],
+    en: [
+      'How do you know whether a value has been seen before?',
+      'Count the distinct values, then compare that with the length of the array.',
+    ],
+  },
+  explanation: {
+    id: `## Pendekatan
 
 Kalau semua nilai unik, maka jumlah nilai unik sama dengan panjang array. Jadi cukup
 ubah array menjadi himpunan, lalu bandingkan ukurannya.
@@ -45,11 +67,26 @@ ubah array menjadi himpunan, lalu bandingkan ukurannya.
 Menyalin array, mengurutkannya, lalu memeriksa pasangan bersebelahan. Kompleksitas
 waktunya O(n log n) dan ruangnya bisa O(1) tambahan, tapi solusi himpunan lebih sederhana
 dan lebih cepat.`,
+    en: `## Approach
+
+If every value is distinct, the number of distinct values equals the length of the array.
+So just turn the array into a set and compare the sizes.
+
+## Complexity
+
+- Time: O(n) — a single pass to build the set.
+- Space: O(n) — worst case when every value is distinct.
+
+## Alternative
+
+Copy the array, sort it, then check adjacent pairs. That runs in O(n log n) time and can
+use O(1) extra space, but the set solution is simpler and faster.`,
+  },
   templates: [
     {
       language: 'javascript',
       template: `function containsDuplicate(nums) {
-  // tulis solusimu di sini
+  // write your solution here
 }
 `,
       solution: `function containsDuplicate(nums) {
@@ -60,7 +97,7 @@ dan lebih cepat.`,
     {
       language: 'python',
       template: `def containsDuplicate(nums):
-    # tulis solusimu di sini
+    # write your solution here
     pass
 `,
       solution: `def containsDuplicate(nums):

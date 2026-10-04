@@ -2,6 +2,8 @@
 const props = defineProps<{
   logs: Array<string>;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -15,7 +17,7 @@ const props = defineProps<{
         aria-hidden="true"
       />
       <span class="text-xs text-neutral-500 font-medium dark:text-neutral-400">
-        Konsol
+        {{ t('console.title') }}
       </span>
     </div>
     <pre class="text-xs text-neutral-600 leading-relaxed font-mono px-3 pb-3 max-h-40 overflow-auto dark:text-neutral-400">{{ props.logs.join('\n') }}</pre>

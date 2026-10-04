@@ -2,9 +2,11 @@ import type { Problem, Track } from '../app/types/content.ts';
 import { readdir } from 'node:fs/promises';
 import process from 'node:process';
 import { loadPyodide } from 'pyodide';
+import { messages } from '../app/i18n/messages.ts';
 import { compare } from '../app/lib/runner/compare.ts';
 import { buildJavaScriptHarness } from '../app/lib/runner/harness.ts';
 import { executePythonCases } from '../app/lib/runner/python-execute.ts';
+import { LOCALES } from '../app/types/i18n.ts';
 
 interface ValidationIssue {
   problem: string;
@@ -46,6 +48,30 @@ async function loadFrom<T>(dir: URL, guard: (value: unknown) => value is T): Pro
 const problems = await loadFrom(new URL('../app/data/problems/', import.meta.url), isProblem);
 const tracks = await loadFrom(new URL('../app/data/tracks/', import.meta.url), isTrack);
 
+/** Memastikan setiap teks terjemahan terisi untuk semua bahasa yang didukung. */
+function assertLocalized(owner: string, field: string, value: unknown): Array<ValidationIssue> {
+  const issues: Array<ValidationIssue> = [];
+
+  if (typeof value !== 'object' || value === null) {
+    return [{ problem: owner, message: `${field} bukan objek terjemahan` }];
+  }
+
+  for (const locale of LOCALES) {
+    const text = (value as Record<string, unknown>)[locale];
+
+    if (typeof text !== 'string' || text.trim().length === 0) {
+      issues.push({ problem: owner, message: `${field}.${locale} kosong` });
+      continue;
+    }
+
+    if (text.includes('TODO') || text.includes('FIXME')) {
+      issues.push({ problem: owner, message: `${field}.${locale} masih berisi penanda TODO` });
+    }
+  }
+
+  return issues;
+}
+
 function assertWellFormed(problem: Problem): Array<ValidationIssue> {
   const issues: Array<ValidationIssue> = [];
   const add = (message: string) => issues.push({ problem: problem.slug, message });
@@ -61,6 +87,34 @@ function assertWellFormed(problem: Problem): Array<ValidationIssue> {
   }
   if (problem.templates.length === 0) {
     add('tidak punya template');
+  }
+
+  issues.push(...assertLocalized(problem.slug, 'title', problem.title));
+  issues.push(...assertLocalized(problem.slug, 'statement', problem.statement));
+
+  for (const locale of LOCALES) {
+    const list = problem.hints[locale];
+
+    if (!Array.isArray(list) || list.length === 0) {
+      add(`hints.${locale} kosong`);
+      continue;
+    }
+
+    for (const [index, hint] of list.entries()) {
+      if (typeof hint !== 'string' || hint.trim().length === 0) {
+        add(`hints.${locale}[${index}] kosong`);
+      }
+    }
+  }
+
+  if (problem.explanation) {
+    issues.push(...assertLocalized(problem.slug, 'explanation', problem.explanation));
+  }
+
+  for (const [index, example] of problem.examples.entries()) {
+    if (example.explanation) {
+      issues.push(...assertLocalized(problem.slug, `examples[${index}].explanation`, example.explanation));
+    }
   }
 
   const ids = new Set<string>();
@@ -187,6 +241,12 @@ function validateStructure(): Array<ValidationIssue> {
   const slugs = new Set(problems.map((problem) => problem.slug));
   const trackIds = new Set(tracks.map((track) => track.id));
 
+  for (const track of tracks) {
+    issues.push(...assertLocalized(track.id, 'title', track.title));
+    issues.push(...assertLocalized(track.id, 'summary', track.summary));
+    issues.push(...assertLocalized(track.id, 'material', track.material));
+  }
+
   for (const problem of problems) {
     if (!trackIds.has(problem.trackId)) {
       issues.push({ problem: problem.slug, message: `trackId ${problem.trackId} tidak ditemukan` });
@@ -204,10 +264,28 @@ function validateStructure(): Array<ValidationIssue> {
   return issues;
 }
 
+function validateMessages(): Array<ValidationIssue> {
+  const issues: Array<ValidationIssue> = [];
+  const reference = Object.keys(messages.id);
+
+  for (const locale of LOCALES) {
+    const dictionary = messages[locale] as Record<string, string>;
+
+    for (const key of reference) {
+      if (typeof dictionary[key] !== 'string' || dictionary[key].trim().length === 0) {
+        issues.push({ problem: 'i18n', message: `kunci ${key} kosong di kamus ${locale}` });
+      }
+    }
+  }
+
+  return issues;
+}
+
 const pyodide = await loadPyodide();
 
 const allIssues: Array<ValidationIssue> = [
   ...validateStructure(),
+  ...validateMessages(),
   ...(
     await Promise.all(
       problems.map(async (problem) => [

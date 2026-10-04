@@ -2,7 +2,10 @@ import type { Problem } from '~/types/content';
 
 export const groupAnagrams: Problem = {
   slug: 'group-anagrams',
-  title: 'Group Anagrams',
+  title: {
+    id: 'Group Anagrams',
+    en: 'Group Anagrams',
+  },
   difficulty: 'medium',
   trackId: 'arrays-hashing',
   order: 5,
@@ -10,29 +13,48 @@ export const groupAnagrams: Problem = {
   parameters: [{ name: 'strs', type: 'string[]' }],
   returnType: 'string[][]',
   timeLimitMs: 2000,
-  statement: `Diberikan sebuah array string \`strs\`.
+  statement: {
+    id: `Diberikan sebuah array string \`strs\`.
 
 Kelompokkan string yang saling anagram ke dalam grup yang sama.
 
 Kembalikan daftar grup. **Urutan grup maupun urutan string di dalam grup tidak penting** —
 yang dinilai adalah isi tiap grup.`,
+    en: `You are given an array of strings \`strs\`.
+
+Group the strings that are anagrams of each other into the same group.
+
+Return the list of groups. **Neither the order of the groups nor the order of the strings
+inside a group matters** — only the contents of each group are judged.`,
+  },
   examples: [
     {
       input: 'strs = ["eat", "tea", "tan", "ate", "nat", "bat"]',
       output: '[["bat"], ["nat", "tan"], ["ate", "eat", "tea"]]',
-      explanation: 'Urutan grup bisa berbeda, isinya yang sama.',
+      explanation: {
+        id: 'Urutan grup bisa berbeda, isinya yang sama.',
+        en: 'The order of the groups may differ; the contents are what matter.',
+      },
     },
     {
       input: 'strs = [""]',
       output: '[[""]]',
     },
   ],
-  hints: [
-    'Apa yang membuat dua string bisa dimasukkan ke grup yang sama?',
-    'Kalau setiap kata diubah ke bentuk yang seragam, kata yang anagram akan menghasilkan bentuk yang identik.',
-    'Urutkan huruf tiap kata, lalu pakai hasilnya sebagai kunci hash.',
-  ],
-  explanation: `## Pendekatan
+  hints: {
+    id: [
+      'Apa yang membuat dua string bisa dimasukkan ke grup yang sama?',
+      'Kalau setiap kata diubah ke bentuk yang seragam, kata yang anagram akan menghasilkan bentuk yang identik.',
+      'Urutkan huruf tiap kata, lalu pakai hasilnya sebagai kunci hash.',
+    ],
+    en: [
+      'What makes two strings belong to the same group?',
+      'If every word is converted to one canonical form, anagrams will produce identical results.',
+      'Sort the letters of each word, then use that as the hash key.',
+    ],
+  },
+  explanation: {
+    id: `## Pendekatan
 
 Agar kata yang anagram menghasilkan kunci yang sama, ubah setiap kata ke bentuk
 terurutnya: \`"eat"\` menjadi \`"aet"\`, dan \`"tea"\` juga menjadi \`"aet"\`.
@@ -54,11 +76,34 @@ di semua tingkat. Jadi jangan khawatir soal urutan grup.
 
 Alih-alih mengurutkan huruf, hitung kemunculan tiap huruf dan jadikan itu kunci.
 Pendekatan ini menurunkan waktunya menjadi O(n · k), dengan tambahan sedikit kode.`,
+    en: `## Approach
+
+To make anagrams produce the same key, convert each word to its sorted form:
+\`"eat"\` becomes \`"aet"\`, and \`"tea"\` also becomes \`"aet"\`.
+
+Use that sorted form as the hash map key, with an array of words as the value.
+Once every word is processed, the hash map values are the answer.
+
+## Complexity
+
+- Time: O(n · k log k) — n words, k the longest word length, with log k from sorting.
+- Space: O(n · k) — storing every word.
+
+## Note
+
+Because order does not matter, grading uses a comparison that ignores ordering at every
+level. So do not worry about the order of the groups.
+
+## Alternative
+
+Instead of sorting letters, count the occurrences of each letter and use that as the key.
+That brings the time down to O(n · k) for a little extra code.`,
+  },
   templates: [
     {
       language: 'javascript',
       template: `function groupAnagrams(strs) {
-  // tulis solusimu di sini
+  // write your solution here
 }
 `,
       solution: `function groupAnagrams(strs) {
@@ -69,8 +114,7 @@ Pendekatan ini menurunkan waktunya menjadi O(n · k), dengan tambahan sedikit ko
     const group = groups.get(key);
     if (group) {
       group.push(word);
-    }
-    else {
+    } else {
       groups.set(key, [word]);
     }
   }
@@ -82,7 +126,7 @@ Pendekatan ini menurunkan waktunya menjadi O(n · k), dengan tambahan sedikit ko
     {
       language: 'python',
       template: `def groupAnagrams(strs):
-    # tulis solusimu di sini
+    # write your solution here
     pass
 `,
       solution: `def groupAnagrams(strs):

@@ -6,6 +6,8 @@ const props = defineProps<{
 }>();
 
 const { trackProgress } = useProgress();
+const { localized } = useI18n();
+
 const progress = computed(() => trackProgress(props.track.id));
 </script>
 
@@ -20,10 +22,10 @@ const progress = computed(() => trackProgress(props.track.id));
       <div class="flex gap-4 items-start justify-between">
         <div class="space-y-1">
           <h3 class="text-sm text-neutral-900 font-semibold dark:text-neutral-100">
-            {{ track.title }}
+            {{ localized(track.title) }}
           </h3>
           <p class="text-sm text-neutral-500 leading-relaxed dark:text-neutral-400">
-            {{ track.summary }}
+            {{ localized(track.summary) }}
           </p>
         </div>
         <span class="text-xs text-neutral-500 shrink-0 tabular-nums dark:text-neutral-400">

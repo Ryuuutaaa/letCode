@@ -12,6 +12,8 @@ const emit = defineEmits<{
   'submit': [];
   'update:language': [value: LanguageId];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -32,7 +34,7 @@ const emit = defineEmits<{
           class="i-lucide-rotate-ccw size-4"
           aria-hidden="true"
         />
-        Reset
+        {{ t('action.reset') }}
       </BaseButton>
 
       <BaseButton
@@ -45,7 +47,7 @@ const emit = defineEmits<{
           class="i-lucide-play size-4"
           aria-hidden="true"
         />
-        Run
+        {{ t('action.run') }}
       </BaseButton>
 
       <BaseButton
@@ -57,7 +59,7 @@ const emit = defineEmits<{
           class="i-lucide-send size-4"
           aria-hidden="true"
         />
-        Submit
+        {{ t('action.submit') }}
       </BaseButton>
     </div>
   </div>

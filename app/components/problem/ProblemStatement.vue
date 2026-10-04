@@ -5,7 +5,9 @@ const props = defineProps<{
   problem: Problem;
 }>();
 
-const html = computed(() => renderMarkdown(props.problem.statement));
+const { localized } = useI18n();
+
+const html = computed(() => renderMarkdown(localized(props.problem.statement)));
 </script>
 
 <template>

@@ -1,5 +1,12 @@
 <script setup lang="ts">
 const error = useError();
+const { t } = useI18n();
+
+const { init: initI18n } = useI18n();
+
+onMounted(() => {
+  initI18n();
+});
 
 function goHome(): void {
   clearError({ redirect: '/' });
@@ -14,10 +21,10 @@ function goHome(): void {
       {{ error?.statusCode ?? 404 }}
     </p>
     <p class="text-sm text-neutral-500 dark:text-neutral-400">
-      {{ error?.statusMessage || 'Halaman tidak ditemukan.' }}
+      {{ error?.statusMessage || t('error.notFound') }}
     </p>
     <BaseButton @click="goHome">
-      Kembali ke dashboard
+      {{ t('error.home') }}
     </BaseButton>
   </div>
 </template>

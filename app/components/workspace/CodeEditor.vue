@@ -12,6 +12,8 @@ const emit = defineEmits<{
   'update:value': [value: string];
 }>();
 
+const { t } = useI18n();
+
 const container = ref<HTMLElement | null>(null);
 const ready = ref(false);
 const editor = useCodeEditor();
@@ -67,7 +69,7 @@ watch(
       class="text-sm text-neutral-500 bg-white flex gap-2 items-center inset-0 justify-center absolute dark:text-neutral-400 dark:bg-neutral-900"
     >
       <BaseSpinner />
-      Menyiapkan editor…
+      {{ t('editor.loading') }}
     </div>
   </div>
 </template>

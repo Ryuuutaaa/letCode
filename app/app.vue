@@ -1,8 +1,10 @@
 <script setup lang="ts">
-const { init } = useTheme();
+const { init: initTheme } = useTheme();
+const { init: initI18n } = useI18n();
 
 onMounted(() => {
-  init();
+  initTheme();
+  initI18n();
 });
 </script>
 

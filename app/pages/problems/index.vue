@@ -1,15 +1,17 @@
 <script setup lang="ts">
 type Filter = 'all' | 'solved' | 'unsolved';
 
-const all = listAllProblems();
 const { getStatus } = useProgress();
+const { t } = useI18n();
+
+const all = listAllProblems();
 const filter = ref<Filter>('all');
 
-const FILTERS: Array<{ label: string; value: Filter }> = [
-  { label: 'Semua', value: 'all' },
-  { label: 'Selesai', value: 'solved' },
-  { label: 'Belum', value: 'unsolved' },
-];
+const FILTERS = computed<Array<{ label: string; value: Filter }>>(() => [
+  { label: t('filter.all'), value: 'all' },
+  { label: t('filter.solved'), value: 'solved' },
+  { label: t('filter.unsolved'), value: 'unsolved' },
+]);
 
 const visible = computed(() =>
   all.filter((problem) => {
@@ -27,8 +29,11 @@ const visible = computed(() =>
   <div class="mx-auto px-4 py-10 max-w-3xl space-y-6">
     <header class="space-y-3">
       <h1 class="text-xl tracking-tight font-semibold">
-        Semua soal
+        {{ t('problems.title') }}
       </h1>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400">
+        {{ t('problems.subtitle') }}
+      </p>
       <div class="flex gap-1 items-center">
         <button
           v-for="option in FILTERS"
@@ -40,6 +45,7 @@ const visible = computed(() =>
               ? 'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
               : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200'
           "
+          :aria-pressed="option.value === filter"
           @click="filter = option.value"
         >
           {{ option.label }}
@@ -49,8 +55,8 @@ const visible = computed(() =>
 
     <BaseEmptyState
       v-if="visible.length === 0"
-      title="Tidak ada soal"
-      description="Belum ada soal yang cocok dengan filter ini."
+      :title="t('difficulty.empty.title')"
+      :description="t('difficulty.empty.description')"
     />
 
     <div

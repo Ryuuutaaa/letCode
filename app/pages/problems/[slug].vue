@@ -22,19 +22,32 @@ const {
 } = useProblemWorkspace(String(route.params.slug));
 
 const { mode } = useTheme();
-const running = computed(() => status.value === 'running');
+const { localized, t } = useI18n();
 
 // Dipanggil di setup, bukan onMounted: hook onMounted milik komponen anak berjalan
 // lebih dulu, sehingga editor akan membaca nilai yang masih kosong.
 initialize();
+
+const running = computed(() => status.value === 'running');
+const title = computed(() => (problem.value ? localized(problem.value.title) : ''));
+const hints = computed(() => (problem.value ? localized(problem.value.hints) : []));
+const explanation = computed(() =>
+  problem.value?.explanation ? localized(problem.value.explanation) : undefined,
+);
+const prevTitle = computed(() =>
+  adjacent.value.prev ? localized(adjacent.value.prev.title) : '',
+);
+const nextTitle = computed(() =>
+  adjacent.value.next ? localized(adjacent.value.next.title) : '',
+);
 </script>
 
 <template>
   <div class="mx-auto px-4 py-8 max-w-6xl">
     <BaseEmptyState
       v-if="!problem"
-      title="Soal tidak ditemukan"
-      description="Periksa kembali tautannya."
+      :title="t('problem.notFound.title')"
+      :description="t('problem.notFound.description')"
     />
 
     <div
@@ -45,7 +58,7 @@ initialize();
         <header class="space-y-3">
           <div class="flex flex-wrap gap-3 items-center">
             <h1 class="text-lg tracking-tight font-semibold">
-              {{ problem.title }}
+              {{ title }}
             </h1>
             <DifficultyBadge :difficulty="problem.difficulty" />
             <BaseBadge
@@ -56,7 +69,7 @@ initialize();
                 class="i-lucide-check size-3"
                 aria-hidden="true"
               />
-              Selesai
+              {{ t('problem.solved') }}
             </BaseBadge>
           </div>
 
@@ -66,14 +79,14 @@ initialize();
               :to="`/problems/${adjacent.prev.slug}`"
               class="hover:underline"
             >
-              ← {{ adjacent.prev.title }}
+              ← {{ prevTitle }}
             </NuxtLink>
             <NuxtLink
               v-if="adjacent.next"
               :to="`/problems/${adjacent.next.slug}`"
               class="ml-auto hover:underline"
             >
-              {{ adjacent.next.title }} →
+              {{ nextTitle }} →
             </NuxtLink>
           </nav>
         </header>
@@ -89,11 +102,11 @@ initialize();
           />
         </div>
 
-        <HintAccordion :hints="problem.hints" />
+        <HintAccordion :hints="hints" />
 
         <SolutionPanel
           v-if="solutionUnlocked"
-          :explanation="problem.explanation"
+          :explanation="explanation"
         />
       </section>
 

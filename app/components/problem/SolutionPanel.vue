@@ -3,6 +3,8 @@ const props = defineProps<{
   explanation?: string;
 }>();
 
+const { t } = useI18n();
+
 const html = computed(() =>
   props.explanation ? renderMarkdown(props.explanation) : '',
 );
@@ -14,7 +16,7 @@ const html = computed(() =>
     class="space-y-3"
   >
     <h2 class="text-sm text-neutral-900 font-semibold dark:text-neutral-100">
-      Pembahasan
+      {{ t('problem.solution') }}
     </h2>
     <div
       class="markdown text-sm text-neutral-700 leading-relaxed dark:text-neutral-300"

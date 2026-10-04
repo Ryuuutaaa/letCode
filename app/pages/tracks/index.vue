@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n();
+
 const tracks = listTracks();
 </script>
 
@@ -6,10 +8,10 @@ const tracks = listTracks();
   <div class="mx-auto px-4 py-10 max-w-5xl space-y-6">
     <header class="space-y-2">
       <h1 class="text-xl tracking-tight font-semibold">
-        Roadmap
+        {{ t('tracks.title') }}
       </h1>
       <p class="text-sm text-neutral-500 dark:text-neutral-400">
-        Urutan topik yang disarankan, dari fondasi sampai lanjutan.
+        {{ t('tracks.subtitle') }}
       </p>
     </header>
 

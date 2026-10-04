@@ -7,6 +7,8 @@ const props = defineProps<{
 }>();
 
 const { getStatus } = useProgress();
+const { localized, t } = useI18n();
+
 const status = computed(() => getStatus(props.problem.slug));
 </script>
 
@@ -20,18 +22,18 @@ const status = computed(() => getStatus(props.problem.slug));
     </span>
 
     <span class="text-sm text-neutral-900 flex-1 truncate dark:text-neutral-100">
-      {{ problem.title }}
+      {{ localized(problem.title) }}
     </span>
 
     <span
       v-if="status === 'solved'"
       class="i-lucide-check text-emerald-600 shrink-0 size-4 dark:text-emerald-400"
-      aria-label="Selesai"
+      :aria-label="t('status.passed')"
     />
     <span
       v-else-if="status === 'attempted'"
       class="i-lucide-clock text-amber-600 shrink-0 size-4 dark:text-amber-400"
-      aria-label="Pernah dicoba"
+      :aria-label="t('status.attempted')"
     />
 
     <DifficultyBadge :difficulty="problem.difficulty" />

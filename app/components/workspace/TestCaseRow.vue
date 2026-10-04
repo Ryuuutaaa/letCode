@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageKey } from '~/i18n/messages';
 import type { CaseResult } from '~/types/runner';
 
 const props = defineProps<{
@@ -6,28 +7,30 @@ const props = defineProps<{
   item: CaseResult;
 }>();
 
+const { t } = useI18n();
+
 const STATUS_META: Record<
   CaseResult['status'],
-  { icon: string; label: string; tone: string }
+  { icon: string; labelKey: MessageKey; tone: string }
 > = {
   passed: {
     icon: 'i-lucide-check',
-    label: 'Lulus',
+    labelKey: 'status.passed',
     tone: 'text-emerald-600 dark:text-emerald-400',
   },
   failed: {
     icon: 'i-lucide-x',
-    label: 'Gagal',
+    labelKey: 'status.failed',
     tone: 'text-red-600 dark:text-red-400',
   },
   timeout: {
     icon: 'i-lucide-clock',
-    label: 'Waktu habis',
+    labelKey: 'status.timeout',
     tone: 'text-amber-600 dark:text-amber-400',
   },
   error: {
     icon: 'i-lucide-triangle-alert',
-    label: 'Error',
+    labelKey: 'status.error',
     tone: 'text-red-600 dark:text-red-400',
   },
 };
@@ -51,9 +54,9 @@ function format(value: unknown): string {
       <span
         class="text-xs font-medium"
         :class="meta.tone"
-      >{{ meta.label }}</span>
+      >{{ t(meta.labelKey) }}</span>
       <span class="text-xs text-neutral-400 dark:text-neutral-500">
-        Kasus {{ props.index }}
+        {{ t('result.caseNumber', { number: props.index }) }}
       </span>
       <span class="text-xs text-neutral-400 ml-auto tabular-nums dark:text-neutral-500">
         {{ props.item.durationMs }} ms
@@ -71,7 +74,7 @@ function format(value: unknown): string {
       v-else-if="props.item.hidden"
       class="text-xs text-neutral-400 dark:text-neutral-500"
     >
-      Test case tersembunyi.
+      {{ t('result.hiddenCase') }}
     </p>
 
     <div
@@ -79,13 +82,13 @@ function format(value: unknown): string {
       class="text-xs font-mono gap-1 grid"
     >
       <p class="text-neutral-500 dark:text-neutral-400">
-        Input: <span class="text-neutral-800 dark:text-neutral-200">{{ format(props.item.input) }}</span>
+        {{ t('result.input') }}: <span class="text-neutral-800 dark:text-neutral-200">{{ format(props.item.input) }}</span>
       </p>
       <p class="text-neutral-500 dark:text-neutral-400">
-        Diharapkan: <span class="text-neutral-800 dark:text-neutral-200">{{ format(props.item.expected) }}</span>
+        {{ t('result.expected') }}: <span class="text-neutral-800 dark:text-neutral-200">{{ format(props.item.expected) }}</span>
       </p>
       <p class="text-neutral-500 dark:text-neutral-400">
-        Hasil: <span class="text-neutral-800 dark:text-neutral-200">{{ format(props.item.actual) }}</span>
+        {{ t('result.output') }}: <span class="text-neutral-800 dark:text-neutral-200">{{ format(props.item.actual) }}</span>
       </p>
     </div>
   </div>

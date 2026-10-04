@@ -6,6 +6,8 @@ const props = defineProps<{
   running: boolean;
 }>();
 
+const { t } = useI18n();
+
 const passedCount = computed(
   () => props.result?.cases.filter((item) => item.status === 'passed').length ?? 0,
 );
@@ -17,14 +19,14 @@ const passedCount = computed(
       class="px-3 py-2 border-b border-neutral-200 flex gap-3 items-center justify-between dark:border-neutral-800"
     >
       <span class="text-xs text-neutral-500 font-medium dark:text-neutral-400">
-        Hasil
+        {{ t('result.latest') }}
       </span>
       <div
         v-if="props.result"
         class="flex gap-2 items-center"
       >
         <span class="text-xs text-neutral-400 tabular-nums dark:text-neutral-500">
-          {{ passedCount }}/{{ props.result.cases.length }} lulus
+          {{ t('result.passedCount', { passed: passedCount, total: props.result.cases.length }) }}
         </span>
         <VerdictBadge :status="props.result.status" />
       </div>
@@ -35,13 +37,13 @@ const passedCount = computed(
       class="text-sm text-neutral-500 px-3 py-8 flex gap-2 items-center dark:text-neutral-400"
     >
       <BaseSpinner />
-      Menjalankan…
+      {{ t('result.running') }}
     </div>
 
     <BaseEmptyState
       v-else-if="!props.result"
-      title="Belum ada hasil"
-      description="Klik Run untuk menguji contoh, atau Submit untuk menilai seluruh test case."
+      :title="t('result.empty.title')"
+      :description="t('result.empty.description')"
     />
 
     <template v-else>

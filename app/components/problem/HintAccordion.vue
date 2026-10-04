@@ -3,6 +3,8 @@ const props = defineProps<{
   hints: Array<string>;
 }>();
 
+const { t } = useI18n();
+
 const revealed = ref(0);
 
 function reveal(): void {
@@ -39,7 +41,7 @@ function reveal(): void {
         class="i-lucide-lightbulb size-4"
         aria-hidden="true"
       />
-      {{ revealed === 0 ? 'Buka hint' : 'Buka hint berikutnya' }}
+      {{ revealed === 0 ? t('hint.reveal') : t('hint.revealNext') }}
     </BaseButton>
   </div>
 </template>
