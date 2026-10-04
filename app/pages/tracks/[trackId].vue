@@ -8,9 +8,6 @@ const track = computed(() => getTrack(trackId.value));
 const problems = computed(() => listProblemsByTrack(trackId.value));
 const title = computed(() => (track.value ? localized(track.value.title) : ''));
 const summary = computed(() => (track.value ? localized(track.value.summary) : ''));
-const materialHtml = computed(() =>
-  track.value ? renderMarkdown(localized(track.value.material)) : '',
-);
 </script>
 
 <template>
@@ -37,10 +34,7 @@ const materialHtml = computed(() =>
         </p>
       </header>
 
-      <section
-        class="markdown text-sm text-neutral-700 leading-relaxed dark:text-neutral-300"
-        v-html="materialHtml"
-      />
+      <TrackMaterial :sections="track.sections" />
 
       <section class="space-y-1">
         <h2 class="text-sm text-neutral-500 font-medium px-3 pb-2 dark:text-neutral-400">

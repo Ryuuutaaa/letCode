@@ -45,7 +45,24 @@ async function loadFrom<T>(dir: URL, guard: (value: unknown) => value is T): Pro
   return modules.flatMap((mod) => Object.values(mod)).filter(guard);
 }
 
-const problems = await loadFrom(new URL('../app/data/problems/', import.meta.url), isProblem);
+/** Soal disimpan per track: `app/data/problems/<track-id>/<slug>.ts`. */
+async function loadProblems(): Promise<Array<{ folder: string; problem: Problem }>> {
+  const root = new URL('../app/data/problems/', import.meta.url);
+  const entries = await readdir(root, { withFileTypes: true });
+  const folders = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+
+  const perTrack = await Promise.all(
+    folders.map(async (folder) => {
+      const list = await loadFrom(new URL(`${folder}/`, root), isProblem);
+      return list.map((problem) => ({ folder, problem }));
+    }),
+  );
+
+  return perTrack.flat();
+}
+
+const problemEntries = await loadProblems();
+const problems = problemEntries.map((entry) => entry.problem);
 const tracks = await loadFrom(new URL('../app/data/tracks/', import.meta.url), isTrack);
 
 /** Memastikan setiap teks terjemahan terisi untuk semua bahasa yang didukung. */
@@ -244,10 +261,32 @@ function validateStructure(): Array<ValidationIssue> {
   for (const track of tracks) {
     issues.push(...assertLocalized(track.id, 'title', track.title));
     issues.push(...assertLocalized(track.id, 'summary', track.summary));
-    issues.push(...assertLocalized(track.id, 'material', track.material));
+
+    if (track.sections.length === 0) {
+      issues.push({ problem: track.id, message: 'tidak punya section materi' });
+    }
+
+    const sectionIds = new Set<string>();
+
+    for (const section of track.sections) {
+      if (sectionIds.has(section.id)) {
+        issues.push({ problem: track.id, message: `id section duplikat: ${section.id}` });
+      }
+      sectionIds.add(section.id);
+
+      issues.push(...assertLocalized(track.id, `sections[${section.id}].title`, section.title));
+      issues.push(...assertLocalized(track.id, `sections[${section.id}].body`, section.body));
+    }
   }
 
-  for (const problem of problems) {
+  for (const { folder, problem } of problemEntries) {
+    if (problem.trackId !== folder) {
+      issues.push({
+        problem: problem.slug,
+        message: `trackId "${problem.trackId}" tidak cocok dengan folder "${folder}"`,
+      });
+    }
+
     if (!trackIds.has(problem.trackId)) {
       issues.push({ problem: problem.slug, message: `trackId ${problem.trackId} tidak ditemukan` });
     }

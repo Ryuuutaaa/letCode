@@ -278,12 +278,19 @@ type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'floatApprox';
 type Locale = 'id' | 'en';
 type Localized<T> = Record<Locale, T>;
 
+/** Satu sub-bab materi. `id` dipakai sebagai anchor daftar isi. */
+interface MaterialSection {
+  id: string;
+  title: Localized<string>;
+  body: Localized<string>; // markdown
+}
+
 interface Track {
   id: string; // 'arrays-hashing'
   title: Localized<string>;
   order: number;
   summary: Localized<string>;
-  material: Localized<string>; // markdown
+  sections: Array<MaterialSection>; // 4–5 sub-bab
   problemSlugs: Array<string>; // urutan belajar
 }
 
@@ -1250,13 +1257,22 @@ eksplisit, sesuai aturan arsitektur bahwa UI tidak pernah menyentuh Worker langs
 
 ### 23.7 `app/data/` — Konten
 
+Soal dikelompokkan **per track**, satu folder per track:
+
 | Path | Isi |
 | --- | --- |
-| `data/tracks/arrays-hashing.ts` | Definisi satu track + urutan soal |
-| `data/problems/two-sum.ts` | Definisi satu soal: kontrak, test case, template, reference solution |
+| `data/tracks/<track-id>.ts` | Definisi satu track: judul, ringkasan, `sections` materi, urutan soal |
+| `data/tracks/index.ts` | Agregasi semua track |
+| `data/problems/index.ts` | Agregasi soal dari seluruh folder track |
+| `data/problems/<track-id>/index.ts` | Agregasi soal satu track |
+| `data/problems/<track-id>/<slug>.ts` | Definisi satu soal: kontrak, test case, template, reference solution |
 
-Aturan: satu file = satu track atau satu soal. Semua data **wajib** lolos
-`scripts/validate-content.ts` sebelum ikut build.
+Aturan:
+
+1. Satu file = satu track atau satu soal.
+2. `problem.trackId` **wajib** sama dengan nama folder tempat file itu berada —
+   diperiksa otomatis oleh validator.
+3. Semua data **wajib** lolos `scripts/validate-content.ts` sebelum ikut build.
 
 ### 23.8 `app/utils/` & `app/types/`
 
@@ -1265,13 +1281,15 @@ Aturan: satu file = satu track atau satu soal. Semua data **wajib** lolos
 | File | Tanggung jawab |
 | --- | --- |
 | `content.ts` | Loader: `listTracks`, `getTrack`, `getProblem`, `listProblemsByTrack`, `getAdjacentProblems`, `getSampleCases`, `getHiddenCases` |
+| `markdown.ts` | `renderMarkdown` — markdown-it dengan `html: false` |
 | `storage.ts` | Adapter `localStorage`: baca/tulis JSON dengan `version` |
 
 **`types/`** — tipe bersama, diimpor eksplisit.
 
 | File | Isi |
 | --- | --- |
-| `content.ts` | `Track`, `Problem`, `TestCase`, `Example`, `CodeTemplate`, `Difficulty`, `LanguageId`, `ComparatorId` |
+| `content.ts` | `Track`, `MaterialSection`, `Problem`, `TestCase`, `Example`, `CodeTemplate`, `Difficulty`, `LanguageId`, `ComparatorId` |
+| `i18n.ts` | `Locale`, `Localized<T>`, `LOCALES`, `LOCALE_LABELS`, `DEFAULT_LOCALE` |
 | `runner.ts` | `RunRequest`, `RunResult`, `CaseResult`, `RunStatus`, `CaseStatus`, `JudgeDriver` |
 | `state.ts` | `ProgressStore`, `ProblemRecord`, `ProblemStatus`, `SettingsStore` |
 
@@ -1408,3 +1426,79 @@ sebelum aplikasi hidrasi, memakai urutan yang sama: pilihan tersimpan → bahasa
 1. Tambahkan kode bahasa ke `Locale` dan `LOCALES` di `app/types/i18n.ts`.
 2. Tambahkan kamus baru di `app/i18n/messages.ts` (kompilasi akan menuntut kelengkapannya).
 3. Tambahkan versi bahasa pada setiap field `Localized<T>` di `app/data/`.
+
+---
+
+## 25. Kurikulum & Konversi Data
+
+### 25.1 Daftar Track
+11 track, diurutkan dari fondasi ke lanjutan. Setiap track berisi 5 soal.
+
+| # | id | Topik |
+| --- | --- | --- |
+| 1 | `arrays-hashing` | Arrays & Hashing |
+| 2 | `two-pointers` | Two Pointers |
+| 3 | `sliding-window` | Sliding Window |
+| 4 | `stack` | Stack |
+| 5 | `binary-search` | Binary Search |
+| 6 | `linked-list` | Linked List |
+| 7 | `trees` | Trees |
+| 8 | `heap` | Heap / Priority Queue |
+| 9 | `graphs` | Graphs |
+| 10 | `dynamic-programming` | Dynamic Programming |
+| 11 | `backtracking` | Backtracking |
+
+Urutan ini mengikuti kurikulum di `note.md` bagian 7, dengan Backtracking sebagai topik
+pelengkap karena polanya wajib dikuasai untuk interview.
+
+### 25.2 Materi Berbentuk Section
+Materi track **tidak** berupa satu blok markdown, melainkan array `sections`. Setiap
+section punya `id` (anchor), `title`, dan `body` (markdown). Halaman track merender daftar
+isi yang bisa diklik di atas, lalu setiap section sebagai sub-bab tersendiri.
+
+Struktur section yang dipakai konsisten di semua track:
+
+| id | Isi |
+| --- | --- |
+| `kenapa` | Kenapa topik ini penting untuk interview |
+| `konsep` | Konsep inti, dijelaskan dari nol |
+| `pola` | Pola-pola utama dan kapan dipakai |
+| `jebakan` | Kesalahan yang sering terjadi |
+| `ingat` | Ringkasan + saran urutan latihan |
+
+### 25.3 Konversi Data untuk Python (penting)
+Argumen dan nilai kembalian antara JS dan Python **tidak** memakai `toPy`/`toJs`, melainkan
+melewati JSON:
+
+```
+JS:  JSON.stringify(args)  →  Python: json.loads(...)
+Python: json.dumps(result, default=str)  →  JS: JSON.parse(...)
+```
+
+Alasannya, konversi bawaan Pyodide tidak simetris untuk nilai kosong:
+
+| Arah | Bawaan Pyodide | Lewat JSON |
+| --- | --- | --- |
+| JS `null` → Python | sentinel `JsNull` (bukan `None`) | `None` |
+| Python `None` → JS | `undefined` (bukan `null`) | `null` |
+
+Tanpa jembatan ini, soal pohon biner dan linked list tidak bisa dinilai dengan benar di
+Python, karena `null` adalah bagian sah dari representasi level-order.
+
+**Konsekuensi untuk penulis konten:** `null` aman dipakai di `expected`, dan solusi Python
+boleh mengembalikan `None` di dalam list. Tipe yang tidak dikenal `json.dumps` dikonversi
+lewat `default=str`, sehingga tetap tidak membuat eksekusi gagal — hanya hasilnya tidak
+akan cocok dengan `expected`.
+
+### 25.4 Batasan Representasi Data
+Semua input dan output harus JSON-serializable, karena melewati batas worker. Karena itu:
+
+| Struktur | Representasi |
+| --- | --- |
+| Linked list | Array; contoh `[1,2,3]` berarti `1 → 2 → 3` |
+| Binary tree | Array level-order dengan `null` untuk anak kosong |
+| Graph | Matriks adjacency atau daftar sisi (`number[][]`) |
+
+Peserta membangun struktur datanya sendiri di dalam kode (misalnya kelas `ListNode` atau
+`TreeNode` yang didefinisikan di template), memproses, lalu mengembalikan hasil sebagai
+nilai JSON. Ini justru melatih keterampilan membangun dan menelusuri struktur tersebut.

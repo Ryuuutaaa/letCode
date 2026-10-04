@@ -65,6 +65,7 @@ const id = {
   'track.notFound.description': 'Periksa kembali tautannya.',
   'track.notFound.title': 'Track tidak ditemukan',
   'track.problems': 'Soal',
+  'track.toc': 'Daftar isi',
   'tracks.subtitle': 'Urutan topik yang disarankan, dari fondasi sampai lanjutan.',
   'tracks.title': 'Roadmap',
 } as const;
@@ -136,6 +137,7 @@ const en: Record<MessageKey, string> = {
   'track.notFound.description': 'Check the link again.',
   'track.notFound.title': 'Track not found',
   'track.problems': 'Problems',
+  'track.toc': 'Table of contents',
   'tracks.subtitle': 'Recommended topic order, from foundations to advanced.',
   'tracks.title': 'Roadmap',
 };

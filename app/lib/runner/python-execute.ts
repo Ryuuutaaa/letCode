@@ -11,6 +11,11 @@ export type PythonExecuteOutcome
 /**
  * Menjalankan kode Python terhadap daftar test case di atas instance Pyodide.
  * Kode dijalankan di namespace baru supaya definisi antar eksekusi tidak bocor.
+ *
+ * Argumen dan nilai kembalian melewati JSON, bukan `toPy`/`toJs`. Alasannya:
+ * `toPy` mengubah `null` menjadi sentinel `JsNull` (bukan `None`), dan `toJs`
+ * mengubah `None` menjadi `undefined` (bukan `null`). Lewat JSON, `null` dan
+ * `None` bolak-balik dengan benar, dan itu penting untuk soal pohon dan linked list.
  */
 export function executePythonCases(
   pyodide: PyodideInterface,
@@ -45,9 +50,10 @@ export function executePythonCases(
     return { ok: false, message: normalizeError(error).message };
   }
 
-  const fn = namespace.get(functionName);
+  const callable = namespace.get(functionName);
 
-  if (typeof fn !== 'function') {
+  if (typeof callable !== 'function') {
+    destroySafe(callable);
     destroySafe(namespace);
     restoreStreams();
 
@@ -57,22 +63,25 @@ export function executePythonCases(
     };
   }
 
-  const callable = fn as (...args: Array<unknown>) => unknown;
+  destroySafe(callable);
 
   const cases = testCases.map((testCase): WorkerCaseOutcome => {
     const startedAt = performance.now();
-    const args = testCase.input.map((value) => pyodide.toPy(value));
     let actual: unknown;
     let errorMessage: string | undefined;
 
     try {
-      const result = callable(...args);
-      actual = isPyProxy(result) ? result.toJs() : result;
-      destroySafe(result);
+      const script = [
+        'import json as _letcode_json',
+        `_letcode_args = _letcode_json.loads(${JSON.stringify(JSON.stringify(testCase.input))})`,
+        `_letcode_out = ${functionName}(*_letcode_args)`,
+        '_letcode_json.dumps(_letcode_out, default=str)',
+      ].join('\n');
+
+      const serialized = pyodide.runPython(script, { globals: namespace });
+      actual = JSON.parse(serialized);
     } catch (error) {
       errorMessage = normalizeError(error).message;
-    } finally {
-      destroyAll(args);
     }
 
     return {
@@ -91,18 +100,6 @@ export function executePythonCases(
   function restoreStreams(): void {
     pyodide.setStdout(originalStdout);
     pyodide.setStderr(originalStderr);
-  }
-}
-
-function isPyProxy(value: unknown): value is { toJs: () => unknown } {
-  return typeof value === 'object' && value !== null && 'toJs' in value;
-}
-
-function destroyAll(values: Array<unknown>): void {
-  for (const value of values) {
-    if (isPyProxy(value) && 'destroy' in value && typeof value.destroy === 'function') {
-      value.destroy();
-    }
   }
 }
 

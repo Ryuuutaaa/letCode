@@ -6,12 +6,19 @@ export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
 export type ComparatorId = 'deepEqual' | 'unorderedDeepEqual' | 'floatApprox';
 
+/** Satu sub-bab materi. `id` dipakai sebagai anchor daftar isi. */
+export interface MaterialSection {
+  id: string;
+  title: Localized<string>;
+  body: Localized<string>;
+}
+
 export interface Track {
   id: string;
   title: Localized<string>;
   order: number;
   summary: Localized<string>;
-  material: Localized<string>;
+  sections: Array<MaterialSection>;
   problemSlugs: Array<string>;
 }
 
