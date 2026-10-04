@@ -73,6 +73,7 @@ Satu situs statis yang menggabungkan:
 | Bahasa soal | Python + JavaScript |
 | Sifat situs | Personal / portofolio dulu, publik menyusul |
 | Strategi eksekusi | Browser-first (tanpa server) |
+| Penghitung kunjungan | Netlify Functions + Blobs — **satu-satunya komponen server-side** (bagian 26) |
 | Gaya soal | Function signature ala LeetCode |
 | Toolchain | Nuxt 4 (Vue 3) + TypeScript |
 | Styling | UnoCSS + `@vinicunca/unocss-preset` |
@@ -638,7 +639,10 @@ dan layout padat tanpa jeda.
    jika nanti ada fitur menjalankan kode orang lain.
 3. **TLE hanya penanda kasar**, bukan pengukuran presisi.
 4. **Bahasa terbatas**: Python & JS. C++/Java tidak praktis di browser.
-5. **Tanpa backend**: tidak ada sinkronisasi lintas perangkat maupun backup otomatis.
+5. **Tanpa backend untuk fitur belajar.** Tidak ada sinkronisasi lintas perangkat maupun
+   backup otomatis; progres tetap murni di `localStorage`. Satu-satunya komponen
+   server-side adalah penghitung kunjungan (bagian 26), yang tidak menyimpan data
+   pengguna sama sekali.
 
 ---
 
@@ -1524,3 +1528,91 @@ Semua input dan output harus JSON-serializable, karena melewati batas worker. Ka
 Peserta membangun struktur datanya sendiri di dalam kode (misalnya kelas `ListNode` atau
 `TreeNode` yang didefinisikan di template), memproses, lalu mengembalikan hasil sebagai
 nilai JSON. Ini justru melatih keterampilan membangun dan menelusuri struktur tersebut.
+
+---
+
+## 26. Penghitung Kunjungan (Visitor Counter)
+
+### 26.1 Ruang Lingkup
+Menampilkan **total page views** di footer, dan menyimpan rincian per halaman serta per
+hari yang bisa dilihat pemilik situs. Ini satu-satunya fitur yang butuh komponen
+server-side; seluruh fitur belajar tetap murni di browser.
+
+### 26.2 Kenapa Butuh Server
+Situs ini statis, jadi tidak ada tempat menyimpan angka yang dibagi ke semua pengunjung.
+Angka di `localStorage` hanya berlaku untuk satu browser, bukan hitungan global.
+
+### 26.3 Pilihan Teknologi
+**Netlify Functions + Netlify Blobs.** Alasan:
+
+1. Sudah hosting di Netlify, jadi tidak menambah penyedia baru.
+2. Gratis selama di bawah kuota free tier (125.000 invocation/bulan).
+3. Tidak ada cookie dan tidak ada pelacakan; yang disimpan hanya angka.
+4. Data ada di akun Netlify sendiri, dan bisa dijelajahi lewat Netlify Blobs UI.
+
+### 26.4 Arsitektur
+
+```
+Browser  →  POST /api/visits  ─┐
+                               ├─→  Netlify Function  →  Blobs store "letcode-visits"
+Browser  ←  { total }         ─┘                          key "summary"
+```
+
+| Berkas | Peran |
+| --- | --- |
+| `netlify/lib/visit-counter.mts` | Logika murni: baca, normalisasi, catat kunjungan |
+| `netlify/functions/visits.mts` | Adapter HTTP: `GET` baca, `POST` catat |
+| `app/components/app/VisitorCounter.vue` | Memanggil endpoint sekali saat halaman dimuat |
+| `app/components/app/AppFooter.vue` | Menampilkan angka |
+| `netlify.toml` | Build command, publish dir, dan rewrite `/api/visits` |
+
+### 26.5 Bentuk Data
+Satu blob `summary` berisi:
+
+```json
+{
+  "total": 128,
+  "pages": { "/": 40, "/problems/two-sum": 12 },
+  "days": { "2026-10-04": 25 }
+}
+```
+
+Rincian ini bisa dilihat di **Netlify → Data & Storage → Blobs**. Tidak perlu halaman
+admin terpisah.
+
+### 26.6 Dua Keputusan Teknis Penting
+
+**Strong consistency.** Bawaan Blobs adalah *eventual consistency*: perubahan bisa baru
+terlihat di semua lokasi hingga 60 detik. Untuk penghitung, itu membuat angka terlihat
+**mundur** di mata pengunjung. Karena itu store dibuka dengan `consistency: 'strong'`.
+
+**Penulisan bersyarat, bukan read-modify-write biasa.** Blobs tidak punya operasi
+increment atomik dan memakai aturan *last write wins*, sehingga dua permintaan bersamaan
+bisa saling menimpa dan kehilangan hitungan. Penulisan memakai `onlyIfMatch` dengan etag
+dan diulang hingga 5 kali. Bila masih bentrok, fungsi mengembalikan `null` — lebih baik
+kehilangan satu hitungan daripada menampilkan angka yang salah.
+
+### 26.7 Batas dan Perlindungan
+Karena klien tidak boleh dipercaya:
+
+| Aspek | Batas |
+| --- | --- |
+| Panjang path | 160 karakter |
+| Jumlah halaman yang dilacak | 300 (total tetap dihitung) |
+| Jumlah hari yang dilacak | 400 |
+| Bentuk path | hanya path absolut; tanpa query dan fragment |
+
+### 26.8 Batasan yang Diterima
+1. **Hitungan bisa dinaikkan dengan sengaja.** Siapa pun bisa memanggil endpoint
+   berkali-kali. Untuk proyek personal ini diterima; angka ini indikator ramai, bukan
+   metrik yang bisa dipercaya.
+2. **Bot ikut terhitung.** Tidak ada penyaringan bot.
+3. **Tanpa data demografis.** Tidak ada negara, browser, atau referrer — itu memerlukan
+   penyimpanan data pribadi.
+4. **Angka tidak tampil bila endpoint gagal.** Footer hanya tidak menampilkan apa pun,
+   tanpa pesan error.
+
+### 26.9 Development Lokal
+`pnpm dev` tidak menjalankan Netlify Function, sehingga `fetch('/api/visits')` gagal dan
+angka tidak tampil. Itu perilaku yang diharapkan, bukan bug. Untuk mencoba function-nya
+secara lokal, jalankan `netlify dev` dengan Netlify CLI.

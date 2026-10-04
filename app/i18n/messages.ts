@@ -25,6 +25,8 @@ const id = {
   'filter.solved': 'Selesai',
   'filter.unsolved': 'Belum',
 
+  'footer.visits': 'Total kunjungan: {count}',
+
   'header.problems': 'Soal',
   'header.tracks': 'Track',
 
@@ -96,6 +98,8 @@ const en: Record<MessageKey, string> = {
   'filter.all': 'All',
   'filter.solved': 'Solved',
   'filter.unsolved': 'Unsolved',
+
+  'footer.visits': 'Total visits: {count}',
 
   'header.problems': 'Problems',
   'header.tracks': 'Tracks',

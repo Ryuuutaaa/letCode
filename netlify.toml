@@ -1,0 +1,13 @@
+[build]
+command = "pnpm generate"
+publish = ".output/public"
+
+[functions]
+directory = "netlify/functions"
+
+# Function-nya sendiri tersedia di /.netlify/functions/visits.
+# Rewrite ini memberi URL yang lebih rapi: /api/visits
+[[redirects]]
+from = "/api/visits"
+to = "/.netlify/functions/visits"
+status = 200

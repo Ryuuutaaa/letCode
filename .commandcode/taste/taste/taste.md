@@ -20,3 +20,4 @@
 - Expects the spec to spell out the complete project folder/file structure — pages, components, assets, icons, and naming/placement conventions — not just features and flows. Confidence: 0.65
 - Favors a minimal asset footprint: no font files, no SVG icon files, no decorative illustrations — assets should be limited to essentials (favicon, robots.txt, one global CSS). Confidence: 0.5
 - Wants a todo/checklist presented first before executing a larger task, then step-by-step execution that is detailed and clear (explicitly asks for the todo first, then a thorough, unambiguous execution of each step). Also expects investigation/analysis findings to be reported in a detailed, clear write-up before fixes are executed. Confidence: 0.75
+- Hosts/deploys his web projects as static sites on Netlify (e.g. `*.netlify.app`) rather than other hosting providers. Confidence: 0.55
